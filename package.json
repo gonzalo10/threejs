@@ -1,0 +1,8 @@
+{
+  "name": "three-js-water",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/gonzalo10/threejs.git",
+  "author": "gonzalo10 <gonzalo.achiaga@gmail.com>",
+  "license": "MIT"
+}
