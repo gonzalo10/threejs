@@ -9,13 +9,16 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'stats.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass.js';
 
 class Example {
 	constructor() {
 		this.init = this.init.bind(this);
 		this.animate = this.animate.bind(this);
 		this.onWindowResize = this.onWindowResize.bind(this);
-
 		this.init();
 	}
 
@@ -38,16 +41,21 @@ class Example {
 			powerPreference: 'high-performance',
 			antialias: true,
 		});
+		this.composer = new EffectComposer(this.renderer);
 
 		document.body.appendChild(this.renderer.domElement);
 		window.addEventListener('resize', this.onWindowResize);
 
 		this.stats = new Stats();
 		document.body.appendChild(this.stats.dom);
+		this.renderPass = new RenderPass(this.scene, this.camera);
+		this.composer.addPass(this.renderPass);
+		this.glitchPass = new GlitchPass();
+		this.composer.addPass(this.glitchPass);
 
 		this.renderer.setPixelRatio(window.devicePixelRatio);
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
-		this.renderer.render(this.scene, this.camera);
+		// this.renderer.render(this.scene, this.camera);
 		this.renderer.setAnimationLoop(this.animate);
 	}
 
@@ -59,7 +67,7 @@ class Example {
 
 		this.controls.update();
 		this.renderer.render(this.scene, this.camera);
-
+		this.composer.render();
 		this.stats.end();
 	}
 
