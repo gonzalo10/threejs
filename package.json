@@ -1,7 +1,21 @@
 {
   "name": "three-js-water",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "stats.js": "0.17.0",
+    "three": "0.106.2"
+  },
+  "devDependencies": {
+    "@types/stats.js": "0.17.0",
+    "@types/three": "0.93.5",
+    "parcel-bundler": "^1.12.3"
+  },
+  "keywords": [],
   "repository": "https://github.com/gonzalo10/threejs.git",
   "author": "gonzalo10 <gonzalo.achiaga@gmail.com>",
   "license": "MIT"
