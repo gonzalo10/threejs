@@ -74,7 +74,7 @@ var WaterPass = function(dt_size) {
 	this.quad = new Mesh(new PlaneBufferGeometry(2, 2), null);
 	this.quad.frustumCulled = false; // Avoid getting clipped
 	this.scene.add(this.quad);
-	this.factor = 0;
+	this.factor = 1;
 	this.time = 0;
 };
 
@@ -87,7 +87,7 @@ WaterPass.prototype = Object.assign(Object.create(Pass.prototype), {
 		this.uniforms['texture'].value = readBuffer.texture;
 		this.uniforms['time'].value = this.time;
 		this.uniforms['factor'].value = this.factor;
-		this.time += 0.15;
+		this.time += 0.05;
 		this.quad.material = this.material;
 		if (this.renderToScreen) {
 			renderer.setRenderTarget(null);
