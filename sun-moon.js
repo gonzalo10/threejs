@@ -1,15 +1,48 @@
 import * as THREE from 'three';
+import { GUI } from 'dat.gui';
+
+// Turns both axes and grid visible on/off
+// dat.GUI requires a property that returns a bool
+// to decide to make a checkbox so we make a setter
+// and getter for `visible` which we can tell dat.GUI
+// to look at.
+class AxisGridHelper {
+	constructor(node, units = 10) {
+		const axes = new THREE.AxesHelper();
+		axes.material.depthTest = false;
+		axes.renderOrder = 2; // after the grid
+		node.add(axes);
+
+		const grid = new THREE.GridHelper(units, units);
+		grid.material.depthTest = false;
+		grid.renderOrder = 1;
+		node.add(grid);
+
+		this.grid = grid;
+		this.axes = axes;
+		this.visible = false;
+	}
+	get visible() {
+		return this._visible;
+	}
+	set visible(v) {
+		this._visible = v;
+		this.grid.visible = v;
+		this.axes.visible = v;
+	}
+}
 
 function main() {
 	const canvas = document.querySelector('#c');
 	const renderer = new THREE.WebGLRenderer({ canvas });
+	const gui = new GUI();
 
 	const fov = 40;
 	const aspect = 2; // the canvas default
 	const near = 0.1;
 	const far = 1000;
 	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-	camera.position.set(0, 150, 0);
+	camera.position.set(0, 50, 0);
 	camera.up.set(0, 0, 1);
 	camera.lookAt(0, 0, 0);
 
@@ -33,20 +66,52 @@ function main() {
 		heightSegments
 	);
 
+	const solarSystem = new THREE.Object3D();
+	scene.add(solarSystem);
+	objects.push(solarSystem);
+
 	const sunMaterial = new THREE.MeshPhongMaterial({ emissive: 0xffff00 });
 	const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
 	sunMesh.scale.set(5, 5, 5);
-	scene.add(sunMesh);
+	solarSystem.add(sunMesh);
 	objects.push(sunMesh);
+
+	const earthOrbit = new THREE.Object3D();
+	earthOrbit.position.x = 10;
+	solarSystem.add(earthOrbit);
+	objects.push(earthOrbit);
 
 	const earthMaterial = new THREE.MeshPhongMaterial({
 		color: 0x2233ff,
 		emissive: 0x112244,
 	});
 	const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
-	earthMesh.position.x = 10;
-	sunMesh.add(earthMesh);
+	earthOrbit.add(earthMesh);
 	objects.push(earthMesh);
+
+	const moonOrbit = new THREE.Object3D();
+	moonOrbit.position.x = 2;
+	earthOrbit.add(moonOrbit);
+
+	const moonMaterial = new THREE.MeshPhongMaterial({
+		color: 0x888888,
+		emissive: 0x222222,
+	});
+	const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+	moonMesh.scale.set(0.5, 0.5, 0.5);
+	moonOrbit.add(moonMesh);
+	objects.push(moonMesh);
+
+	function makeAxisGrid(node, label, units) {
+		const helper = new AxisGridHelper(node, units);
+		gui.add(helper, 'visible').name(label);
+	}
+
+	makeAxisGrid(solarSystem, 'solarSystem', 25);
+	makeAxisGrid(sunMesh, 'sunMesh');
+	makeAxisGrid(earthOrbit, 'earthOrbit');
+	makeAxisGrid(earthMesh, 'earthMesh');
+	makeAxisGrid(moonMesh, 'moonMesh');
 
 	function resizeRendererToDisplaySize(renderer) {
 		const canvas = renderer.domElement;
