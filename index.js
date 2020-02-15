@@ -2,14 +2,10 @@ import {
 	Scene,
 	Color,
 	Mesh,
-	MeshBasicMaterial,
+	MeshNormalMaterial,
 	BoxBufferGeometry,
 	PerspectiveCamera,
 	WebGLRenderer,
-	TorusKnotBufferGeometry,
-	MeshPhongMaterial,
-	DoubleSide,
-	DirectionalLight,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'stats.js';
@@ -27,98 +23,20 @@ class Example {
 		this.init();
 	}
 
-	addObject(x, y, z, obj) {
-		const spread = 15;
-		obj.position.x = x * spread;
-		obj.position.y = y * spread;
-		obj.position.z = z * spread;
-		console.log(this.objects);
-		this.scene.add(obj);
-		this.objects.push(obj);
-	}
-
-	createMaterial() {
-		const material = MeshPhongMaterial({
-			side: DoubleSide,
-		});
-
-		const hue = Math.random();
-		const saturation = 1;
-		const luminance = 0.5;
-		material.color.setHSL(hue, saturation, luminance);
-
-		return material;
-	}
-
-	addSolidGeometry(x, y, z, geometry) {
-		const mesh = new Mesh(geometry);
-		this.addObject(x, y, z, mesh);
-	}
-
 	init() {
 		this.aspect = window.innerWidth / window.innerHeight;
 		this.camera = new PerspectiveCamera(50, this.aspect, 1, 1000);
 		this.camera.position.z = 700;
+
 		this.controls = new OrbitControls(this.camera);
 
-		this.scene = new Scene();
-
-		// light
-		{
-			const color = 0xffffff;
-			const intensity = 1;
-			const light = new DirectionalLight(color, intensity);
-			light.position.set(-1, 2, -4);
-			this.scene.add(light);
-		}
-		{
-			const color = 0xffffff;
-			const intensity = 1;
-			const light = new DirectionalLight(color, intensity);
-			light.position.set(1, -2, -4);
-			this.scene.add(light);
-		}
-
-		this.geometry = new BoxBufferGeometry(200, 200);
-		this.material = new MeshBasicMaterial({ color: 'skyblue' });
-
+		this.geometry = new BoxBufferGeometry(200, 200, 200);
+		this.material = new MeshNormalMaterial();
 		this.mesh = new Mesh(this.geometry, this.material);
 
+		this.scene = new Scene();
 		this.scene.background = new Color('#191919');
 		this.scene.add(this.mesh);
-
-		{
-			const radius = 35;
-			const tube = 15;
-			const radialSegments = 8;
-			const tubularSegments = 64;
-			const p = 2;
-			const q = 3;
-			this.addSolidGeometry(
-				0,
-				0,
-				-10,
-				new TorusKnotBufferGeometry(
-					radius,
-					tube,
-					tubularSegments,
-					radialSegments,
-					p,
-					q
-				)
-			);
-		}
-		{
-			const width = 8;
-			const height = 8;
-			const depth = 8;
-			this.addSolidGeometry(
-				2,
-				10,
-				0,
-				new BoxBufferGeometry(width, height, depth)
-			);
-		}
 
 		this.renderer = new WebGLRenderer({
 			powerPreference: 'high-performance',
@@ -131,16 +49,15 @@ class Example {
 
 		this.stats = new Stats();
 		document.body.appendChild(this.stats.dom);
-
 		this.renderPass = new RenderPass(this.scene, this.camera);
-		this.waterpass = new WaterPass();
+		this.composer.addPass(this.renderPass);
+		// this.glitchPass = new GlitchPass();
+		// this.composer.addPass(this.glitchPass);
+		this.waterPass = new WaterPass();
+		this.composer.addPass(this.waterPass);
 
 		this.renderer.setPixelRatio(window.devicePixelRatio);
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-		this.composer.addPass(this.renderPass);
-		// this.composer.addPass(this.waterpass);
-
 		this.renderer.render(this.scene, this.camera);
 		this.renderer.setAnimationLoop(this.animate);
 	}
@@ -148,10 +65,12 @@ class Example {
 	animate() {
 		this.stats.begin();
 
-		this.controls.update();
+		this.mesh.rotation.x += 0.02;
+		this.mesh.rotation.y += 0.001;
 
-		this.renderer.render(this.scene, this.camera);
-		this.composer.render();
+		this.controls.update();
+		// this.renderer.render(this.scene, this.camera);
+		this.composer.render(this.scene, this.camera);
 
 		this.stats.end();
 	}

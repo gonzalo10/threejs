@@ -61,7 +61,9 @@ function main() {
 		carHeight,
 		carLength
 	);
-	const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x6688aa });
+	const bodyMaterial = new THREE.MeshPhongMaterial({
+		color: 0x6688aa,
+	});
 	const bodyMesh = new THREE.Mesh(bodyGeometry, bodyMaterial);
 	bodyMesh.position.y = 1.4;
 	bodyMesh.castShadow = true;
